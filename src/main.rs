@@ -1,5 +1,7 @@
+use barakah::*;
 use axum_error::Result;
 use std::net::SocketAddr;
+use sailfish::TemplateOnce;
 use axum::{response::Html, routing::get, Router};
  
 #[tokio::main]
@@ -11,6 +13,6 @@ async fn main() {
         .unwrap()
 }
  
-async fn index() -> Html<String> {
-    Html(String::from("<h1>Hello there</h1>"))
+async fn index() -> Result<Html<String>> {
+    Ok(Html(template::Index.render_once()?))
 }
