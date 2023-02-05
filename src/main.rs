@@ -1,5 +1,4 @@
 use barakah::*;
-use sailfish::TemplateOnce;
 use std::{net::SocketAddr, sync::Arc};
 use axum::{response::Html, routing::get, Router};
 
@@ -18,4 +17,3 @@ async fn main() -> Result<()> {
 async fn index(db: Database) -> Result<Html<String>> {
     Ok(Html(template::Index.render_once()?)
 }
-
