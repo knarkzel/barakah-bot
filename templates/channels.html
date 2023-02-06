@@ -16,7 +16,10 @@
   <h2>Channels</h2>
   <ul>
   <% for channel in &channels { %>
-    <li><%= channel.name %> [<%= channel.channel_id %>]</li>
+    <li>
+      <%= channel.name %>
+      [<a href="/channels/delete/<%= channel.id %>">Delete</a>]
+    </li>
   <% } %>
   </ul>
 <% } %>

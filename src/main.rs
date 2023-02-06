@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Query, State},
+    extract::{Path, Query, State},
     http::StatusCode,
     response::{Html, IntoResponse, Redirect},
     routing::{get, get_service},
@@ -26,6 +26,7 @@ async fn main() -> Result<()> {
         .route("/", get(index))
         .route("/comments", get(comments))
         .route("/channels", get(channels).post(insert_channel))
+        .route("/channels/delete/:id", get(delete_channel))
         .nest_service("/static", static_files)
         .with_state(Arc::new(Database::new().await?));
 
@@ -43,29 +44,29 @@ async fn index() -> Result<Html<String>> {
 // Channels
 async fn channels(State(db): State<Arc<Database>>) -> Result<impl IntoResponse> {
     // Fetch channels
-    let channels = db.call(|conn| {
-        let mut stmt = conn.prepare("SELECT name, channel_id FROM channel")?;
-        let channels = stmt
-            .query_map([], |row| {
-                Ok(types::Channel {
-                    name: row.get(0)?,
-                    channel_id: row.get(1)?,
-                })
-            })?
-            .collect::<Result<Vec<_>, _>>()?;
-        Ok::<_, rusqlite::Error>(channels)
-    })
-    .await?;
+    let channels = db
+        .call(|conn| {
+            let mut stmt = conn.prepare("SELECT id, name, channel_id FROM channel")?;
+            let channels = stmt
+                .query_map([], |row| {
+                    Ok(types::Channel {
+                        id: row.get(0)?,
+                        name: row.get(1)?,
+                        channel_id: row.get(2)?,
+                    })
+                })?
+                .collect::<Result<Vec<_>, _>>()?;
+            Ok::<_, rusqlite::Error>(channels)
+        })
+        .await?;
 
-    let template = template::Channels {
-        channels,
-    };
+    let template = template::Channels { channels };
     Ok(Html(template.render_once()?))
 }
 
 async fn insert_channel(
     State(db): State<Arc<Database>>,
-    Form(channel): Form<types::Channel>,
+    Form(channel): Form<types::ChannelForm>,
 ) -> Result<impl IntoResponse> {
     // Insert into database
     db.call(move |conn| {
@@ -75,6 +76,17 @@ async fn insert_channel(
         )
     })
     .await?;
+
+    // Redirect back to channels
+    Ok(Redirect::to("/channels"))
+}
+
+async fn delete_channel(
+    State(db): State<Arc<Database>>,
+    Path(id): Path<usize>,
+) -> Result<impl IntoResponse> {
+    // Remove from database
+    db.call(move |conn| conn.execute("DELETE FROM channel WHERE id = (?1)", params![id])).await?;
 
     // Redirect back to channels
     Ok(Redirect::to("/channels"))

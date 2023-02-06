@@ -8,12 +8,18 @@ pub mod utils;
 pub mod types {
     use serde::Deserialize;
 
-    #[derive(Deserialize)]
     pub struct Channel {
+        pub id: usize,
         pub name: String,
         pub channel_id: String,
     }
 
+    #[derive(Deserialize)]
+    pub struct ChannelForm {
+        pub name: String,
+        pub channel_id: String,
+    }
+    
     #[derive(Deserialize)]
     pub struct Video {
         pub video_id: Option<String>,
