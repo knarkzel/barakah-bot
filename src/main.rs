@@ -1,11 +1,12 @@
 use axum::{
-    extract::State,
+    extract::{Query, State},
     http::StatusCode,
-    response::{Html, IntoResponse},
+    response::{Html, IntoResponse, Redirect},
     routing::{get, get_service},
-    Router,
+    Form, Router,
 };
-use barakah::*;
+use barakah::{utils::*, *};
+use rusqlite::params;
 use std::{net::SocketAddr, sync::Arc};
 use tower_http::services::ServeDir;
 
@@ -18,10 +19,13 @@ async fn main() -> Result<()> {
     color_eyre::install()?;
 
     // Static files
-    let static_files = get_service(ServeDir::new("static")).handle_error(handle_error);
+    let folder = concat!(env!("CARGO_MANIFEST_DIR"), "/static");
+    let static_files = get_service(ServeDir::new(folder)).handle_error(handle_error);
 
     let app = Router::new()
         .route("/", get(index))
+        .route("/comments", get(comments))
+        .route("/channels", get(channels).post(insert_channel))
         .nest_service("/static", static_files)
         .with_state(Arc::new(Database::new().await?));
 
@@ -31,6 +35,57 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn index(State(db): State<Arc<Database>>) -> Result<Html<String>> {
-    Ok(Html(template::Index.render_once()?))
+async fn index() -> Result<Html<String>> {
+    let template = template::Index;
+    Ok(Html(template.render_once()?))
+}
+
+// Channels
+async fn channels(State(db): State<Arc<Database>>) -> Result<impl IntoResponse> {
+    // Fetch channels
+    let channels = db.call(|conn| {
+        let mut stmt = conn.prepare("SELECT name, channel_id FROM channel")?;
+        let channels = stmt
+            .query_map([], |row| {
+                Ok(types::Channel {
+                    name: row.get(0)?,
+                    channel_id: row.get(1)?,
+                })
+            })?
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok::<_, rusqlite::Error>(channels)
+    })
+    .await?;
+
+    let template = template::Channels {
+        channels,
+    };
+    Ok(Html(template.render_once()?))
+}
+
+async fn insert_channel(
+    State(db): State<Arc<Database>>,
+    Form(channel): Form<types::Channel>,
+) -> Result<impl IntoResponse> {
+    // Insert into database
+    db.call(move |conn| {
+        conn.execute(
+            "INSERT INTO channel (name, channel_id) VALUES (?1, ?2)",
+            params![channel.name, channel.channel_id],
+        )
+    })
+    .await?;
+
+    // Redirect back to channels
+    Ok(Redirect::to("/channels"))
+}
+
+// Comments
+async fn comments(Query(video): Query<types::Video>) -> Result<impl IntoResponse> {
+    let body = match video.video_id {
+        Some(id) => fetch_comments(id).await?,
+        _ => String::new(),
+    };
+    let template = template::Comments { body };
+    Ok(Html(template.render_once()?))
 }

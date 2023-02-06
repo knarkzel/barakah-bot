@@ -1,5 +1,0 @@
-CREATE TABLE IF NOT EXISTS apikey (
-    id    INTEGER PRIMARY KEY,
-    name  TEXT NOT NULL,
-    value TEXT NOT NULL
-);

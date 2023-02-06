@@ -1,0 +1,15 @@
+<% include!("header.html"); %>
+
+<form>
+  <div>
+    <label for="video_id">Video ID</label>
+    <input id="video_id" type="text" name="video_id" required/>
+  </div>
+  <div>
+    <input type="submit" value="Show comments for video" />
+  </div>
+</form>
+
+<pre><%= body %></pre>
+
+<% include!("footer.html"); %>

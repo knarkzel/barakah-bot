@@ -1,6 +1,25 @@
 // Imports
 pub use axum_error::Result;
 
+// Modules
+pub mod utils;
+
+// Types
+pub mod types {
+    use serde::Deserialize;
+
+    #[derive(Deserialize)]
+    pub struct Channel {
+        pub name: String,
+        pub channel_id: String,
+    }
+
+    #[derive(Deserialize)]
+    pub struct Video {
+        pub video_id: Option<String>,
+    }
+}
+
 // Templates
 pub use sailfish::TemplateOnce;
 
@@ -10,6 +29,18 @@ pub mod template {
     #[derive(TemplateOnce)]
     #[template(path = "index.html")]
     pub struct Index;
+
+    #[derive(TemplateOnce)]
+    #[template(path = "comments.html")]
+    pub struct Comments {
+        pub body: String,
+    }
+
+    #[derive(TemplateOnce)]
+    #[template(path = "channels.html")]
+    pub struct Channels {
+        pub channels: Vec<types::Channel>,
+    }
 }
 
 // Database
@@ -23,7 +54,7 @@ impl Database {
         let database = concat!(env!("CARGO_MANIFEST_DIR"), "/database.sqlite");
         let connection = Connection::open(database).await?;
 
-        // Run migrations
+        // Create tables
         let tables = concat!(env!("CARGO_MANIFEST_DIR"), "/tables");
         for file in std::fs::read_dir(tables)? {
             let body = std::fs::read_to_string(file?.path())?;

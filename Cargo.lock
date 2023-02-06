@@ -130,6 +130,7 @@ dependencies = [
  "reqwest",
  "rusqlite",
  "sailfish",
+ "serde",
  "tokio",
  "tokio-rusqlite",
  "tower-http",

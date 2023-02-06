@@ -10,6 +10,7 @@ axum-error = "0.2"
 color-eyre = "0.6"
 tokio-rusqlite = "0.3"
 tokio = { version = "1.25", features = ["full"] }
-rusqlite = { version = "0.28", features = ["bundled"] }
-reqwest = { version = "0.11", default-features = false, features = ["rustls-tls"] }
 tower-http = { version = "0.3.5", features = ["fs"] }
+serde = { version = "1.0.152", features = ["derive"] }
+rusqlite = { version = "0.28", features = ["bundled"] }
+reqwest = { version = "0.11", default-features = false, features = ["rustls-tls", "json"] }

@@ -1,0 +1,24 @@
+<% include!("header.html"); %>
+
+<form action="/channels" method="POST">
+  <div>
+    <label for="name">Name</label>
+    <input id="name" type="text" name="name" required/>
+    <label for="channel_id">Channel ID</label>
+    <input id="channel_id" type="text" name="channel_id" required/>
+  </div>
+  <div>
+    <input type="submit" value="Add channel to list"/>
+  </div>
+</form>
+
+<% if channels.len() > 0 { %>
+  <h2>Channels</h2>
+  <ul>
+  <% for channel in &channels { %>
+    <li><%= channel.name %> [<%= channel.channel_id %>]</li>
+  <% } %>
+  </ul>
+<% } %>
+
+<% include!("footer.html"); %>
