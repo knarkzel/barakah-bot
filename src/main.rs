@@ -27,6 +27,7 @@ async fn main() -> Result<()> {
         .route("/comments", get(comments))
         .route("/channels", get(channels).post(insert_channel))
         .route("/channels/delete/:id", get(delete_channel))
+        .route("/videos", get(videos))
         .nest_service("/static", static_files)
         .with_state(Arc::new(Database::new().await?));
 
@@ -93,11 +94,21 @@ async fn delete_channel(
 }
 
 // Comments
-async fn comments(Query(video): Query<types::Video>) -> Result<impl IntoResponse> {
+async fn comments(Query(video): Query<types::VideoId>) -> Result<impl IntoResponse> {
     let body = match video.video_id {
         Some(id) => fetch_comments(id).await?,
         _ => String::new(),
     };
     let template = template::Comments { body };
+    Ok(Html(template.render_once()?))
+}
+
+// Videos
+async fn videos(Query(video): Query<types::ChannelId>) -> Result<impl IntoResponse> {
+    let videos = match video.channel_id {
+        Some(id) => fetch_videos(id).await?,
+        _ => Vec::new(),
+    };
+    let template = template::Videos { videos };
     Ok(Html(template.render_once()?))
 }

@@ -1,0 +1,24 @@
+<% include!("header.html"); %>
+
+<form>
+  <div>
+    <label for="channel_id">Channel ID</label>
+    <input id="channel_id" type="text" name="channel_id" required/>
+  </div>
+  <div>
+    <input type="submit" value="Fetch videos from channel"/>
+  </div>
+</form>
+
+<% if videos.len() > 0 { %>
+  <h2>Videos</h2>
+  <ul>
+  <% for video in &videos { %>
+    <li>
+      <%= video %>
+    </li>
+  <% } %>
+  </ul>
+<% } %>
+
+<% include!("footer.html"); %>

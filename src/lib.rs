@@ -19,9 +19,30 @@ pub mod types {
         pub name: String,
         pub channel_id: String,
     }
+
+    #[derive(Deserialize)]
+    pub struct ChannelId {
+        pub channel_id: Option<String>,
+    }
+
+    #[derive(Deserialize)]
+    pub struct Videos {
+        pub items: Vec<Video>,
+    }
     
     #[derive(Deserialize)]
     pub struct Video {
+        pub id: VideoSnippet,
+    }
+
+    #[derive(Deserialize)]
+    pub struct VideoSnippet {
+        #[serde(rename = "videoId")]
+        pub video_id: String,
+    }
+    
+    #[derive(Deserialize)]
+    pub struct VideoId {
         pub video_id: Option<String>,
     }
 }
@@ -40,6 +61,12 @@ pub mod template {
     #[template(path = "comments.html")]
     pub struct Comments {
         pub body: String,
+    }
+
+    #[derive(TemplateOnce)]
+    #[template(path = "videos.html")]
+    pub struct Videos {
+        pub videos: Vec<String>,
     }
 
     #[derive(TemplateOnce)]
