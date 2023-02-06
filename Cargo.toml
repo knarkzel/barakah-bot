@@ -5,8 +5,10 @@ edition = "2021"
 
 [dependencies]
 axum = "0.6"
+sailfish = "0.6"
 axum-error = "0.2"
-sailfish = "0.6.0"
+color-eyre = "0.6"
 tokio-rusqlite = "0.3"
+tokio = { version = "1.25", features = ["full"] }
+rusqlite = { version = "0.28", features = ["bundled"] }
 reqwest = { version = "0.11", default-features = false, features = ["rustls-tls"] }
-tokio = { version = "1.25.0", default-features = false, features = ["macros", "rt-multi-thread"] }
