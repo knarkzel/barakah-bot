@@ -29,7 +29,7 @@ impl Database {
             let body = std::fs::read_to_string(file?.path())?;
             connection.call(move |db| db.execute(&body, [])).await?;
         }
-        
+
         Ok(Self(connection))
     }
 }
